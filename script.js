@@ -18,6 +18,7 @@ const stimuli = document.querySelectorAll(".circle");
 let circle1 = stimuli[0];
 let circle2 = stimuli[1];
 let circles = [circle1, circle2];
+var nextCircle = 0;
 
 const colours = ["red", "orange", "green", "blue", "violet"]
 
@@ -71,10 +72,12 @@ const getRandomColour = function(){
 }
 
 const changeRandomCircleColour = function(){
-  changeCircleColour(Math.floor(Math.random() * circles.length), getRandomColour());
+  changeCircleColour(nextCircle, getRandomColour());
 }
 
 const changeCircleColour = function (circleNum, colour) {
+  nextCircle == 0 ? nextCircle = 1 : nextCircle = 0;
+
   console.log("change circle " , circleNum, " to ", colour)
 
   circles[circleNum].classList.remove("inactive");
