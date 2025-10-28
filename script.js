@@ -10,7 +10,7 @@ const experiment = {
   btnDisabled:false
 };
 
-const minWaitTime = 0.1;
+const minWaitTime = 0.5;
 const maxWaitTime = 1.0;
 
 const btn = document.querySelector(".button-default");
@@ -72,7 +72,10 @@ const getRandomColour = function(){
 }
 
 const changeRandomCircleColour = function(){
-  changeCircleColour(nextCircle, getRandomColour());
+  var colour = getRandomColour();
+  while(experiment.circleColours[nextCircle] == colour) colour = getRandomColour();
+  
+  changeCircleColour(nextCircle, colour);
 }
 
 const changeCircleColour = function (circleNum, colour) {
