@@ -49,7 +49,7 @@ const advanceTrial = function (missed=false) {
     
   } else {
     //experiment ended
-  endExperiment();
+    endExperiment();
   }
 };
 
@@ -66,6 +66,8 @@ const endExperiment = function () {
 };
 
 const scheduleStimulus = function () {
+  if (experiment.times.length >= experiment.maxTrials) return;
+
   var waitTime = (Math.random() * maxWaitTime) + minWaitTime;
 
   if(experiment.stimulusShown) waitTime = maxWaitTime;
@@ -98,6 +100,7 @@ const changeRandomCircleColour = function(){
 }
 
 const changeCircleColour = function (circleNum, colour) {
+  if (experiment.times.length >= experiment.maxTrials) return;
   nextCircle == 0 ? nextCircle = 1 : nextCircle = 0;
 
   console.log("change circle " , circleNum, " to ", colour)
@@ -151,6 +154,8 @@ const logReaction = function (missed=false) {
 };
 
 const userReaction = function (missed=false) {
+  if (experiment.times.length >= experiment.maxTrials) return;
+  
   console.log("User reaction!")
   if (!experiment.started) {
     console.log("experiment not started :(");
