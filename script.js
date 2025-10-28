@@ -10,9 +10,20 @@ const experiment = {
   btnDisabled:false
 };
 
-const minWaitTime = 0.5;
-const maxWaitTime = 1.0;
-const stimulusMissTime = 1.5;
+
+/************** TUNABLES *****************/
+/**/                                  /**/
+/**/      const minWaitTime = 0.1;    /**/
+/**/      const maxWaitTime = 1.0;    /**/
+/**/                                  /**/
+/****************************************/
+// mess around with these if you want!
+
+// maxWaitTime is the number of seconds 
+// the program will wait after the colours 
+// match before moving on and counting it
+// as a miss
+
 
 const btn = document.querySelector(".button-default");
 const stimuli = document.querySelectorAll(".circle");
@@ -21,7 +32,7 @@ let circle2 = stimuli[1];
 let circles = [circle1, circle2];
 var nextCircle = 0;
 
-const colours = ["red", "orange", "green"]// "blue", "violet"]
+const colours = ["red", "orange", "green", "blue", "violet"]
 
 var experimentAdvanced = false;
 
@@ -57,7 +68,7 @@ const endExperiment = function () {
 const scheduleStimulus = function () {
   var waitTime = (Math.random() * maxWaitTime) + minWaitTime;
 
-  if(experiment.stimulusShown) waitTime = stimulusMissTime;
+  if(experiment.stimulusShown) waitTime = maxWaitTime;
 
   //experiment.stimulusWait = true;
   experiment.waitHnd = window.setTimeout(changeRandomCircleColour, waitTime * 1000); //setTimeout runs in milliseconds
@@ -73,17 +84,6 @@ const showStimulus = function () {
   );
   experiment.stimulusShown = true;
 };
-
-const missStimulus = function() {
-  experiment.stimulusShown = false;
-
-  console.info("INFO: User missed stimulus.");
-
-  experiment.times.push(stimulusMissTime);
-  document.querySelector("#time").textContent = stimulusMissTime + " ms";
-
-  advanceTrial();
-}
 
 //------------------------
 const getRandomColour = function(){
@@ -144,7 +144,7 @@ const logReaction = function (missed=false) {
   console.info("INFO: User reaction captured.", userReactedAt);
 
   let deltaTime = userReactedAt - experiment.stimulusShownAt;
-  if(missed) deltaTime = stimulusMissTime * 1000;
+  if(missed) deltaTime = maxWaitTime * 1000;
 
   experiment.times.push(deltaTime);
   document.querySelector("#time").textContent = deltaTime + " ms";
@@ -159,14 +159,12 @@ const userReaction = function (missed=false) {
 
   if (experiment.stimulusShown) {
     console.log("stimulus shown!");
-    
-    if(missed) console.log("missed it though");
+
+    if (missed) console.log("missed it!");
+
     //stimulus is visible, capture
     logReaction(missed);
     advanceTrial(missed);
-  }
-  else{
-    //missStimulus();
   }
 };
 
