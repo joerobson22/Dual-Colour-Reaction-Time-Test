@@ -12,6 +12,7 @@ const experiment = {
 
 const minWaitTime = 0.5;
 const maxWaitTime = 1.0;
+const stimulusMissTime = 1.5;
 
 const btn = document.querySelector(".button-default");
 const stimuli = document.querySelectorAll(".circle");
@@ -20,18 +21,24 @@ let circle2 = stimuli[1];
 let circles = [circle1, circle2];
 var nextCircle = 0;
 
-const colours = ["red", "orange", "green", "blue", "violet"]
+const colours = ["red", "orange", "green"]// "blue", "violet"]
 
-const advanceTrial = function () {
-  resetStimuli();
+var experimentAdvanced = false;
+
+const advanceTrial = function (missed=false) {
+  
+  //resetStimuli();
 
   experiment.stimulusShown = false;
   if (experiment.times.length < experiment.maxTrials) {
+    if(!missed && experimentAdvanced) return;
     //still need to run more trials
+    experimentAdvanced = true;
     scheduleStimulus();
+    
   } else {
     //experiment ended
-    endExperiment();
+  endExperiment();
   }
 };
 
@@ -50,7 +57,9 @@ const endExperiment = function () {
 const scheduleStimulus = function () {
   var waitTime = (Math.random() * maxWaitTime) + minWaitTime;
 
-  experiment.stimulusWait = true;
+  if(experiment.stimulusShown) waitTime = stimulusMissTime;
+
+  //experiment.stimulusWait = true;
   experiment.waitHnd = window.setTimeout(changeRandomCircleColour, waitTime * 1000); //setTimeout runs in milliseconds
 };
 
@@ -62,9 +71,19 @@ const showStimulus = function () {
     ". Stimulus shown",
     experiment.stimulusShownAt
   );
-  experiment.stimulusWait = false;
   experiment.stimulusShown = true;
 };
+
+const missStimulus = function() {
+  experiment.stimulusShown = false;
+
+  console.info("INFO: User missed stimulus.");
+
+  experiment.times.push(stimulusMissTime);
+  document.querySelector("#time").textContent = stimulusMissTime + " ms";
+
+  advanceTrial();
+}
 
 //------------------------
 const getRandomColour = function(){
@@ -74,7 +93,7 @@ const getRandomColour = function(){
 const changeRandomCircleColour = function(){
   var colour = getRandomColour();
   while(experiment.circleColours[nextCircle] == colour) colour = getRandomColour();
-  
+
   changeCircleColour(nextCircle, colour);
 }
 
@@ -93,9 +112,11 @@ const changeCircleColour = function (circleNum, colour) {
   if (experiment.circleColours[0] == experiment.circleColours[1]){
     showStimulus();
   }
-  else{
-    scheduleStimulus();
+  else if(experiment.stimulusShown){
+    userReaction(true);
+    return;
   }
+  scheduleStimulus();
 };
 
 const deleteColoursFromStimulus = function(circleNum){
@@ -118,27 +139,34 @@ const resetStimuli = function(){
 }
 //-----------------------
 
-const logReaction = function () {
+const logReaction = function (missed=false) {
   let userReactedAt = Date.now();
   console.info("INFO: User reaction captured.", userReactedAt);
 
   let deltaTime = userReactedAt - experiment.stimulusShownAt;
+  if(missed) deltaTime = stimulusMissTime * 1000;
+
   experiment.times.push(deltaTime);
   document.querySelector("#time").textContent = deltaTime + " ms";
 };
 
-const userReaction = function () {
+const userReaction = function (missed=false) {
+  console.log("User reaction!")
   if (!experiment.started) {
+    console.log("experiment not started :(");
     return;
   } //prior to start of experiment, ignore
-  if (experiment.stimulusWait) {
-    return;
-  } //ignore false trigger reactions
 
   if (experiment.stimulusShown) {
+    console.log("stimulus shown!");
+    
+    if(missed) console.log("missed it though");
     //stimulus is visible, capture
-    logReaction();
-    advanceTrial();
+    logReaction(missed);
+    advanceTrial(missed);
+  }
+  else{
+    //missStimulus();
   }
 };
 
